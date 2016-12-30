@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Serving a Python Flask Website on Hostmonster</title>
+
+  <meta name="author" content="Fotis Gimian" />
+
+  
+
+  <meta name="generator" content="Hugo 0.18" />
+
+  <link rel="alternate" href="http://fgimian.github.io/index.xml" type="application/rss+xml" title="Fotsies Technology Blog">
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="http://fgimian.github.io/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="http://fgimian.github.io/css/main.css" />
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+  <link rel="stylesheet" href="http://fgimian.github.io/css/custom.css" />
+  <link rel="stylesheet" href="http://fgimian.github.io/css/solarized-dark.css" />
+
+  <link rel="icon" type="image/png" href="http://fgimian.github.io/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="http://fgimian.github.io/favicon-16x16.png" sizes="16x16" />
+
+  
+  <meta property="og:title" content="Serving a Python Flask Website on Hostmonster" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/2014/02/14/serving-a-python-flask-website-on-hostmonster//" />
+  <meta property="og:image" content="img/fotis.jpg" />
+
+</head>
+
+
+  <body>
+
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://fgimian.github.io/">Fotsies Technology Blog</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+          <a title="Blog" href="/">Blog</a>
+  	      </li>
+  	    
+      
+        
+          <li>
+          <a title="About" href="/page/about/">About</a>
+  	      </li>
+  	    
+      
+      </ul>
+    </div>
+
+	<div class="avatar-container">
+	  <div class="avatar-img-border">
+      
+          <a title="Fotsies Technology Blog" href="http://fgimian.github.io/">
+              <img class="avatar-img" src="http://fgimian.github.io/img/fotis.jpg" alt="Fotsies Technology Blog" />
+          </a>
+      
+	  </div>
+	</div>
+
+  </div>
+</nav>
+
+
+    <div role="main" class="container main-content">
+
+      
+        <header class="header-post">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <div class="post-heading">
+        <h1>Serving a Python Flask Website on Hostmonster</h1>
+        
+        <span class="post-meta">Posted on February 14, 2014</span>
+      </div>
+     </div>
+  </div>
+</header>
+
+<article>
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+	  <p>Hey there folks, it&rsquo;s been a while!</p>
+
+<p>In this post, I&rsquo;ll be guiding you through setting up Hostmonster (or similar
+shared hosting providers) to serve a Python Flask web application.  I&rsquo;ll be
+using my new <a href="https://github.com/fgimian/flaskage">Flaskage</a> template project
+as the application, but naturally you can adapt this solution to work with any
+Flask application.</p>
+
+<p>We&rsquo;ll create a temporary build directory to put things in:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>mkdir ~/build
+<span class="nb">cd</span> ~/build
+</pre></div>
+</td></tr></table>
+<p>First, start by building and installing Python on the system:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3
+4
+5
+6
+7</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>curl -O http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz
+tar xvfz Python-2.7.6.tgz
+<span class="nb">cd</span> Python-2.7.6
+./configure --prefix<span class="o">=</span><span class="nv">$HOME</span>/python
+make
+make install
+<span class="nb">cd</span> ..
+</pre></div>
+</td></tr></table>
+<p>And now, for the sake of having binaries like lessc and coffee available,
+we&rsquo;ll also install Node.js:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>curl -O http://nodejs.org/dist/v0.10.25/node-v0.10.25-linux-x64.tar.gz
+mkdir ~/nodejs
+tar xvfz node-v0.10.25-linux-x64.tar.gz -C ~/nodejs --strip 1
+</pre></div>
+</td></tr></table>
+<p>Let&rsquo;s now make our new Python and Node.js bin directories the default on the
+system.  Just ensure that the PATH variable is set as follows in
+<strong>~/.bash_profile</strong>:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># User specific environment and startup programs</span>
+<span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="nv">$HOME</span>/bin:<span class="nv">$HOME</span>/python/bin:<span class="nv">$HOME</span>/nodejs/bin:<span class="nv">$PATH</span>
+</pre></div>
+</td></tr></table>
+<p>Source the file again and ensure that the system is using our new python binary
+and can also find our node binary too:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/.bash_profile
+which python
+which node
+</pre></div>
+</td></tr></table>
+<p>Now we&rsquo;ll install pip and virtualenv:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>curl -sSL http://peak.telecommunity.com/dist/ez_setup.py <span class="p">|</span> python
+easy_install pip
+pip install virtualenv
+</pre></div>
+</td></tr></table>
+<p>Let&rsquo;s create a new virtualenv for our application (Flaskage in this case):</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>mkdir ~/.virtualenv/
+virtualenv ~/.virtualenv/flaskage
+<span class="nb">source</span> ~/.virtualenv/flaskage/bin/activate
+</pre></div>
+</td></tr></table>
+<p>We&rsquo;re now done with our build directory, so let&rsquo;s clean it up:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nb">cd</span> ~
+rm -rfv build/
+</pre></div>
+</td></tr></table>
+<p>I discovered some dramas when cloning via git:// URLs on Hostmonster and
+therefore I suggest you force Git to use HTTPS instead:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>git config --global url.<span class="s2">&quot;https://&quot;</span>.insteadOf git://
+</pre></div>
+</td></tr></table>
+<p>Ok, we&rsquo;re now ready to clone Flaskage and install all required dependencies:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3
+4
+5</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>git clone https://github.com/fgimian/flaskage.git
+<span class="nb">cd</span> flaskage/
+pip install -r requirements.txt
+npm install -g bower less clean-css coffee-script uglify-js
+bower install
+</pre></div>
+</td></tr></table>
+<p>We&rsquo;ll also need <strong>flup</strong> to serve the site via FCGI:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>pip install flup
+</pre></div>
+</td></tr></table>
+<p>We&rsquo;re getting really close now.  Our application is completely ready to be
+served and all dependencies are installed, so all that&rsquo;s left to do is write
+a small FCGI script and .htaccess file.</p>
+
+<p>Relative to <strong>~/public_html/</strong>, change into the root directory from which you
+wish your website to be served.  If you want the website served starting at /
+on your domain, then simply change into public_html, but in my case, I&rsquo;ll serve
+the website from /flaskage (e.g. <a href="http://www.mydomain.com/flaskage">http://www.mydomain.com/flaskage</a>).</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2
+3</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nb">cd</span> ~/public_html/
+mkdir flaskage
+<span class="nb">cd</span> flaskage/
+</pre></div>
+</td></tr></table>
+<p>In this directory, create an FCGI script (I called mine <strong>flaskage.fcgi</strong>) as
+follows:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-python" data-lang="python"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/home/fots/.virtualenv/flaskage/bin/python</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">flup.server.fcgi</span> <span class="kn">import</span> <span class="n">WSGIServer</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/home/fots/flaskage&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">application</span> <span class="kn">import</span> <span class="n">create_app</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">(</span><span class="s1">&#39;production&#39;</span><span class="p">)</span>
+    <span class="n">WSGIServer</span><span class="p">(</span><span class="n">app</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</td></tr></table>
+<p>You&rsquo;ll naturally need to modify this file to suit your application.  The main
+things you should modify are as follows:</p>
+
+<ul>
+<li>The first line should point to the python binary of your virtualenv</li>
+<li>The sys path insert needs to correspond to your application&rsquo;s root directory
+(the location where you can import app or your application factory create_app
+function)</li>
+<li>The lines relating to the import and creation of app need to be modified
+depending on how your application has been built (e.g. if not using
+factories, you may simply import your app object and call it a day)</li>
+</ul>
+
+<p>Ensure you make the FCGI script executable and test that it returns the
+homepage of your application:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><code class="language-bash" data-lang="bash">1
+2</code></pre></div></td><td class="code"><div class="highlight"><pre><span></span>chmod +x flaskage.fcgi
+./flaskage.fcgi
+</pre></div>
+</td></tr></table>
+<p>And now for the .htaccess file:</p>
+
+<pre><code>AddHandler fcgid-script .fcgi
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ flaskage.fcgi/$1 [QSA,L]
+</code></pre>
+
+<p>Note the last line which should be modified to include the filename of your
+FCGI script above.</p>
+
+<p>Phew, that was a little painful huh?  But you made it!  You should now be able
+to browse to
+<a href="http://www.yourdomain.com/flaskage">http://www.yourdomain.com/flaskage</a> and
+see the Flaskage landing page.</p>
+
+<p>Keep in mind the complexity behind this landing page.  It has tested that all
+the Node.js components and Bower components have worked correctly in addition
+to our Python build and virtualenv package setup.</p>
+
+<p>Naturally, I have my reservations about running a site over FCGI instead of
+WSGI, but seriously, it should perform as well as any standard PHP site.
+Those running bigger and higher-traffic sites likely have a Linode, Amazon EC2
+or other dedicated hosting solution and can deploy their site via Nginx and
+WSGI anyway.</p>
+
+<p>Have a good one! :)</p>
+
+	</div>
+  </div>
+</article>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <ul class="pager blog-pager">
+      
+      <li class="previous">
+        <a href="http://fgimian.github.io/blog/2013/05/12/building-an-rpm-of-the-latest-openssh-on-sles-10-sp3/" data-toggle="tooltip" data-placement="top" title="Building an RPM of the Latest OpenSSH on SLES 10 SP3">&larr; Previous Post</a>
+      </li>
+      
+      
+      <li class="next">
+        <a href="http://fgimian.github.io/blog/2014/03/04/essential-python-libraries/" data-toggle="tooltip" data-placement="top" title="Essential Python Libraries">Next Post &rarr;</a>
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<div class="row disqus-comments">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'fgimian';
+    var disqus_identifier = 'http:\/\/fgimian.github.io\/blog\/2014\/02\/14\/serving-a-python-flask-website-on-hostmonster\/';
+    var disqus_title = 'Serving a Python Flask Website on Hostmonster';
+    var disqus_url = 'http:\/\/fgimian.github.io\/blog\/2014\/02\/14\/serving-a-python-flask-website-on-hostmonster\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+</div>
+
+
+      
+
+      
+      <div class="row disqus-comments">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+          <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'fgimian';
+    var disqus_identifier = 'http:\/\/fgimian.github.io\/blog\/2014\/02\/14\/serving-a-python-flask-website-on-hostmonster\/';
+    var disqus_title = 'Serving a Python Flask Website on Hostmonster';
+    var disqus_url = 'http:\/\/fgimian.github.io\/blog\/2014\/02\/14\/serving-a-python-flask-website-on-hostmonster\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </div>
+      </div>
+      
+
+    </div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          
+          <li>
+            <a href="https://github.com/fgimian" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		      
+          <li>
+            <a href="https://twitter.com/fgimian" title="Twitter">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		      
+		      
+          <li>
+            <a href="https://linkedin.com/in/fotis-gimian-a5420053" title="LinkedIn">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+	    	  
+          <li>
+            <a href="https://stackoverflow.com/users/1905666/fotis-gimian" title="StackOverflow">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+    		  <li>
+      			<a href="http://fgimian.github.io/index.xml" title="RSS">
+      			  <span class="fa-stack fa-lg">
+        				<i class="fa fa-circle fa-stack-2x"></i>
+        				<i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+      			  </span>
+      			</a>
+    		  </li>		
+
+        </ul>
+        <p class="copyright text-muted">
+    		  Fotis Gimian
+    		  &nbsp;&bull;&nbsp;
+    		  2016
+    		  
+    		  
+    		  &nbsp;&bull;&nbsp;
+    		  <a href="http://fgimian.github.io/">Fotsies Technology Blog</a>
+    		  
+  	    </p>
+  	        
+    		<p class="theme-by text-muted">
+    		  Theme by
+    		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+    		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="http://fgimian.github.io/js/jquery-1.11.2.min.js"></script>
+<script src="http://fgimian.github.io/js/bootstrap.min.js"></script>
+<script src="http://fgimian.github.io/js/main.js"></script>
+
+
+
+  </body>
+</html>
